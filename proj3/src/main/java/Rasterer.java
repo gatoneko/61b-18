@@ -11,6 +11,8 @@ public class Rasterer {
 
     private static final int MAX_DEPTH = 7;
 
+    private static final double ROOT_HEIGHT = MapServer.ROOT_ULLAT - MapServer.ROOT_LRLAT;
+    private static final double ROOT_WIDTH = MapServer.ROOT_LRLON - MapServer.ROOT_ULLON;
 
     public Rasterer() {
         // YOUR CODE HERE
@@ -49,11 +51,84 @@ public class Rasterer {
 
         int depth = getDepth(params.get("lrlon"), params.get("ullon"), params.get("w"));
 
+        double upLeftLon = params.get("ullon");
+        double upLeftLat = params.get("ullat");
+        double lowRightLon = params.get("lrlon");
+        double lowRightLat = params.get("lrlat");
+
+
+        double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+        double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+
+        String topLeftTile = getTopLeftTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
+        String bottomRightTile = getBottomRightTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
+
+
+
         Map<String, Object> results = new HashMap<>();
         results = helloWorlding(results);
-        System.out.println("Since you haven't implemented getMapRaster, nothing is displayed in "
-                           + "your browser.");
         return results;
+    }
+
+    private static String getTopLeftTile(int depth, double tileHeight, double tileWidth, double upLeftLon, double upLeftLat) {
+        int topLeftY = getTopLeftY(depth, tileHeight, upLeftLat);
+        int topLeftX = getTopLeftX(depth, tileWidth, upLeftLon);
+        return "d" + depth + "_x" + topLeftX + "_y" + topLeftY + ".png";
+    }
+
+
+    private static int getTopLeftX(int depth, double tileWidth, double upLeftLon) {
+        int numOfTiles = (int) Math.pow(2,depth);
+        double currentBottomCorner = MapServer.ROOT_ULLON + tileWidth;
+        for (int tileIndex = 0; tileIndex < numOfTiles ; tileIndex++) {
+            if (currentBottomCorner > upLeftLon) { //todo does it matter if this is >= or > ??? Calc bottom right needed it.
+                return tileIndex;
+            }
+            currentBottomCorner += tileWidth;
+        }
+        return -1;
+    }
+
+    private static int getTopLeftY(int depth, double tileHeight, double upLeftLat) {
+        int numOfTiles = (int) Math.pow(2,depth);
+        double currentBottomCorner = MapServer.ROOT_ULLAT - tileHeight;
+        for (int tileIndex = 0; tileIndex < numOfTiles; tileIndex++) {
+            if (currentBottomCorner < upLeftLat) { //todo does it matter if this is >= or > ??? Calc bottom right needed it.
+                return tileIndex;
+            }
+            currentBottomCorner -= tileHeight;
+        }
+        return -1;
+    }
+
+    private static String getBottomRightTile(int depth, double tileHeight, double tileWidth, double lowRightLon, double lowRightLat) {
+        int botLeftY = getBotLeftY(depth, tileHeight, lowRightLat);
+        int botLeftX = getBotLeftX(depth, tileWidth, lowRightLon);
+        return "d" + depth + "_x" + botLeftX + "_y" + botLeftY + ".png";
+    }
+
+    private static int getBotLeftY(int depth, double tileHeight, double lowRightLat) {
+        int numOfTiles = (int) Math.pow(2,depth);
+        double currentBottomCorner = MapServer.ROOT_LRLAT + tileHeight;
+        for (int tileIndex = numOfTiles - 1; tileIndex >= 0; tileIndex--) {
+            if (currentBottomCorner >= lowRightLat) {
+                return tileIndex;
+            }
+            currentBottomCorner += tileHeight;
+        }
+        return -1;
+    }
+
+    private static int getBotLeftX(int depth, double tileWidth, double lowRightLon) {
+        int numOfTiles = (int) Math.pow(2,depth);
+        double currentBottomCorner = MapServer.ROOT_LRLON - tileWidth;
+        for (int tileIndex = numOfTiles - 1; tileIndex >= 0; tileIndex--) {
+            if (currentBottomCorner <= lowRightLon) {
+                return tileIndex;
+            }
+            currentBottomCorner -= tileWidth;
+        }
+        return -1;
     }
 
     /** Satisfies test.html through manual input */
@@ -74,16 +149,16 @@ public class Rasterer {
     /** Returns depth. from 0 to 7. -1 is error */
     private static int getDepth(double lowRightLon, double upLeftLon, double width) { //It's odd that the size in pixels was a floating number.. you can't have half a pixel... This might be some fucked case test where a monitor with 1.5 pixels
         //Future todo sanitize screen size input to integers.
-        int result = -1;
 
         double windowLonDPP = calcLonDPP(lowRightLon, upLeftLon, width);
 
         double tilelowRightLon = calcLowRightLon(MAX_DEPTH);
         double tileLonDPP  = calcLonDPP(tilelowRightLon, MapServer.ROOT_ULLON, MapServer.TILE_SIZE);
+
         if (windowLonDPP < tileLonDPP) {
             return MAX_DEPTH;
         }
-        for (int depth = 0; depth <= 7; depth++) {
+        for (int depth = 0; depth <= MAX_DEPTH; depth++) {
             tilelowRightLon = calcLowRightLon(depth);
             tileLonDPP = calcLonDPP(tilelowRightLon, MapServer.ROOT_ULLON, MapServer.TILE_SIZE);
             if (tileLonDPP <= windowLonDPP)  {
@@ -91,7 +166,7 @@ public class Rasterer {
             }
         }
 
-        return result;
+        return -1;
     }
 
     private static double calcLonDPP(double lowRightLon, double upLeftLon, double boxWidth) { //tested
@@ -105,8 +180,35 @@ public class Rasterer {
         return lowRightLon;
     }
 
+    private static int calcNumberOfTiles(int depth, double windowUpLeftLon, double windowlowRightLon) {
+        return 0;
+    }
+
+    /** returns longitudinal or latitudinal length/width of tile based on zoom level
+     * Maybe I don't understand this. Maybe I'm never supposed to calculate
+     * the latitude
+     * distance of latitude is different depending where you are above/below the
+     * sekidou
+     * */
+    private static double sizeOfTile(double distance, int depth) {
+        return distance / Math.pow(2,depth);
+    }
+
     public static void main (String[] args) {
-        System.out.println(calcLonDPP(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 512));
-        System.out.println(getDepth(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 513));
+        int depth = 0;
+        double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+        double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
+        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
+
+        depth = 7;
+        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.241632, 37.87655));
+        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.24054, 37.87548));
+
+//        System.out.println(sizeOfTile(ROOT_WIDTH, 0));
+//        System.out.println(calcLonDPP(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 512));
+//        System.out.println(getDepth(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 513));
     }
 }
