@@ -71,20 +71,21 @@ public class Rasterer {
         return results;
     }
 
-    private static int getDepth(double lrlon, double ullon, double width) { //It's odd that the size in pixels was a floating number.. you can't have half a pixel... This might be some fucked case test where a monitor with 1.5 pixels
+    /** Returns depth. from 0 to 7. -1 is error */
+    private static int getDepth(double lowRightLon, double upLeftLon, double width) { //It's odd that the size in pixels was a floating number.. you can't have half a pixel... This might be some fucked case test where a monitor with 1.5 pixels
         //Future todo sanitize screen size input to integers.
         int result = -1;
 
-        double windowLonDPP = calcLonDPP(lrlon, ullon, width);
+        double windowLonDPP = calcLonDPP(lowRightLon, upLeftLon, width);
 
-        double tilelrlon = calcLowRightLon(MAX_DEPTH);
-        double tileLonDPP  = calcLonDPP(tilelrlon, MapServer.ROOT_ULLON, MapServer.TILE_SIZE);
+        double tilelowRightLon = calcLowRightLon(MAX_DEPTH);
+        double tileLonDPP  = calcLonDPP(tilelowRightLon, MapServer.ROOT_ULLON, MapServer.TILE_SIZE);
         if (windowLonDPP < tileLonDPP) {
             return MAX_DEPTH;
         }
         for (int depth = 0; depth <= 7; depth++) {
-            tilelrlon = calcLowRightLon(depth);
-            tileLonDPP = calcLonDPP(tilelrlon, MapServer.ROOT_ULLON, MapServer.TILE_SIZE);
+            tilelowRightLon = calcLowRightLon(depth);
+            tileLonDPP = calcLonDPP(tilelowRightLon, MapServer.ROOT_ULLON, MapServer.TILE_SIZE);
             if (tileLonDPP <= windowLonDPP)  {
                 return depth;
             }
@@ -93,8 +94,8 @@ public class Rasterer {
         return result;
     }
 
-    private static double calcLonDPP(double lrlon, double ullon, double boxWidth) { //tested
-        return ((lrlon - ullon) / boxWidth);
+    private static double calcLonDPP(double lowRightLon, double upLeftLon, double boxWidth) { //tested
+        return ((lowRightLon - upLeftLon) / boxWidth);
     }
 
     private static double calcLowRightLon(int depth) { //tested
