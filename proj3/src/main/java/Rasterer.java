@@ -64,14 +64,43 @@ public class Rasterer {
         //todo put all of the functionality to get these in a separate class
         //todo: It would make more sense to have a tile object and pass it all around
 
+
+        // you're getting wrong because you're feeding the query coordinates
         Tile topLeftTile = getTopLeftTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
         Tile bottomRightTile = getBottomRightTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
 
         Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
 
+
+
+        String[][] tileNames = convertTilestoStrings(queryGrid);
+
         Map<String, Object> results = new HashMap<>();
-        results = helloWorlding(results);
+        results.put("render_grid", tileNames);
+        results.put("raster_ul_lon", topLeftTile.getUllon());
+        results.put("raster_ul_lat", topLeftTile.getUllat());
+        results.put("raster_lr_lon", bottomRightTile.getLrlon());
+        results.put("raster_lr_lat", bottomRightTile.getLrlat());
+        results.put("depth", depth);
+        results.put("query_success", true);
+//        results = helloWorlding(results);
+        System.out.println(results);
         return results;
+    }
+
+    private String[][] convertTilestoStrings(Tile[][] queryGrid) {
+
+        int ylength = queryGrid.length;
+        int xlength = queryGrid[0].length; //array should never be jagged
+
+        String[][] result = new String[ylength][xlength];
+
+        for (int i = 0; i < ylength; i++) {
+            for (int j = 0; j < xlength; j++) {
+                result[i][j] = queryGrid[i][j].toString();
+            }
+        }
+        return result;
     }
 
     private static Tile[][] getQueryGrid(int depth, Tile topLeftTile, Tile bottomRightTile) {
@@ -81,14 +110,17 @@ public class Rasterer {
         int startX = topLeftTile.getxVal();
         int startY = topLeftTile.getyVal();
 
+        int currentX = startX;
+
         Tile[][] queryGrid = new Tile[height][width];
 
         for (int i = 0; i < height; i++){
             for (int j = 0; j < width; j++) {
-                queryGrid[i][j] = new Tile(depth, startX, startY);
-                startX++;
+                queryGrid[i][j] = new Tile(depth, currentX, startY);
+                currentX++;
             }
             startY++;
+            currentX = startX;
         }
         return queryGrid;
     }
@@ -96,7 +128,10 @@ public class Rasterer {
     private static Tile getTopLeftTile(int depth, double tileHeight, double tileWidth, double upLeftLon, double upLeftLat) {
         int topLeftY = getTopLeftY(depth, tileHeight, upLeftLat);
         int topLeftX = getTopLeftX(depth, tileWidth, upLeftLon);
-        return new Tile(depth, topLeftX, topLeftY);
+        Tile result = new Tile(depth, topLeftX, topLeftY);
+        result.setUllon(MapServer.ROOT_ULLON + (tileWidth * topLeftX));
+        result.setUllat(MapServer.ROOT_ULLAT - (tileHeight * topLeftY));
+        return result;
     }
 
 
@@ -127,7 +162,22 @@ public class Rasterer {
     private static Tile getBottomRightTile(int depth, double tileHeight, double tileWidth, double lowRightLon, double lowRightLat) {
         int botLeftY = getBotLeftY(depth, tileHeight, lowRightLat);
         int botLeftX = getBotLeftX(depth, tileWidth, lowRightLon);
-        return new Tile(depth, botLeftX, botLeftY);
+        Tile result = new Tile(depth, botLeftX, botLeftY);
+        result.setLrlon(MapServer.ROOT_ULLON + (tileWidth * (botLeftX + 1)));
+        result.setLrlat(MapServer.ROOT_ULLAT - (tileHeight * (botLeftY + 1)));
+        return result;
+    }
+
+    private static int getBotLeftX(int depth, double tileWidth, double lowRightLon) {
+        int numOfTiles = (int) Math.pow(2,depth);
+        double currentBottomCorner = MapServer.ROOT_LRLON - tileWidth;
+        for (int tileIndex = numOfTiles - 1; tileIndex >= 0; tileIndex--) {
+            if (currentBottomCorner <= lowRightLon) {
+                return tileIndex;
+            }
+            currentBottomCorner -= tileWidth;
+        }
+        return -1;
     }
 
     private static int getBotLeftY(int depth, double tileHeight, double lowRightLat) {
@@ -142,17 +192,6 @@ public class Rasterer {
         return -1;
     }
 
-    private static int getBotLeftX(int depth, double tileWidth, double lowRightLon) {
-        int numOfTiles = (int) Math.pow(2,depth);
-        double currentBottomCorner = MapServer.ROOT_LRLON - tileWidth;
-        for (int tileIndex = numOfTiles - 1; tileIndex >= 0; tileIndex--) {
-            if (currentBottomCorner <= lowRightLon) {
-                return tileIndex;
-            }
-            currentBottomCorner -= tileWidth;
-        }
-        return -1;
-    }
 
     /** Satisfies test.html through manual input */
     private Map<String, Object> helloWorlding(Map<String, Object> results) {

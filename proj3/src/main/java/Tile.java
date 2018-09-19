@@ -1,7 +1,12 @@
 public class Tile {
+
     private int depth;
     private int xVal;
     private int yVal;
+    private double ullon;
+    private double ullat;
+    private double lrlon;
+    private double lrlat;
 
 
     public Tile(int depth, int xVal, int yVal) {
@@ -9,6 +14,40 @@ public class Tile {
         this.xVal = xVal;
         this.yVal = yVal;
     }
+
+    public double getUllon() {
+        return ullon;
+    }
+
+    public void setUllon(double ullon) {
+        this.ullon = ullon;
+    }
+
+    public double getUllat() {
+        return ullat;
+    }
+
+    public void setUllat(double ullat) {
+        this.ullat = ullat;
+    }
+
+    public double getLrlon() {
+        return lrlon;
+    }
+
+    public void setLrlon(double lrlon) {
+        this.lrlon = lrlon;
+    }
+
+    public double getLrlat() {
+        return lrlat;
+    }
+
+    public void setLrlat(double lrlat) {
+        this.lrlat = lrlat;
+    }
+
+
 
     public int getDepth() {
         return depth;
@@ -39,6 +78,7 @@ public class Tile {
         return "" +
                 "d" + depth +
                 "_x" + xVal +
-                "_y" + yVal;
+                "_y" + yVal +
+                ".png";
     }
 }
