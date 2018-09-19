@@ -50,7 +50,6 @@ public class Rasterer {
         System.out.println(params);
 
         int depth = getDepth(params.get("lrlon"), params.get("ullon"), params.get("w"));
-
         double upLeftLon = params.get("ullon");
         double upLeftLat = params.get("ullat");
         double lowRightLon = params.get("lrlon");
@@ -60,20 +59,44 @@ public class Rasterer {
         double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
         double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
 
-        String topLeftTile = getTopLeftTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
-        String bottomRightTile = getBottomRightTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
 
+        //todo you can refactor this to be just half the methods if you make all of your searching from the top left corner.
+        //todo put all of the functionality to get these in a separate class
+        //todo: It would make more sense to have a tile object and pass it all around
 
+        Tile topLeftTile = getTopLeftTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
+        Tile bottomRightTile = getBottomRightTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
+
+        Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
 
         Map<String, Object> results = new HashMap<>();
         results = helloWorlding(results);
         return results;
     }
 
-    private static String getTopLeftTile(int depth, double tileHeight, double tileWidth, double upLeftLon, double upLeftLat) {
+    private static Tile[][] getQueryGrid(int depth, Tile topLeftTile, Tile bottomRightTile) {
+        int width =  bottomRightTile.getxVal() - topLeftTile.getxVal() + 1; //plus one for inclusive width/height
+        int height=  bottomRightTile.getyVal() - topLeftTile.getyVal() + 1;
+
+        int startX = topLeftTile.getxVal();
+        int startY = topLeftTile.getyVal();
+
+        Tile[][] queryGrid = new Tile[height][width];
+
+        for (int i = 0; i < height; i++){
+            for (int j = 0; j < width; j++) {
+                queryGrid[i][j] = new Tile(depth, startX, startY);
+                startX++;
+            }
+            startY++;
+        }
+        return queryGrid;
+    }
+
+    private static Tile getTopLeftTile(int depth, double tileHeight, double tileWidth, double upLeftLon, double upLeftLat) {
         int topLeftY = getTopLeftY(depth, tileHeight, upLeftLat);
         int topLeftX = getTopLeftX(depth, tileWidth, upLeftLon);
-        return "d" + depth + "_x" + topLeftX + "_y" + topLeftY + ".png";
+        return new Tile(depth, topLeftX, topLeftY);
     }
 
 
@@ -101,10 +124,10 @@ public class Rasterer {
         return -1;
     }
 
-    private static String getBottomRightTile(int depth, double tileHeight, double tileWidth, double lowRightLon, double lowRightLat) {
+    private static Tile getBottomRightTile(int depth, double tileHeight, double tileWidth, double lowRightLon, double lowRightLat) {
         int botLeftY = getBotLeftY(depth, tileHeight, lowRightLat);
         int botLeftX = getBotLeftX(depth, tileWidth, lowRightLon);
-        return "d" + depth + "_x" + botLeftX + "_y" + botLeftY + ".png";
+        return new Tile(depth, botLeftX, botLeftY);
     }
 
     private static int getBotLeftY(int depth, double tileHeight, double lowRightLat) {
@@ -206,6 +229,12 @@ public class Rasterer {
         tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
         System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.241632, 37.87655));
         System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.24054, 37.87548));
+
+        depth = 7;
+        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.21260070800781, 37.82334456722848));
+        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.2119140625, 38.82280243352756));
 
 //        System.out.println(sizeOfTile(ROOT_WIDTH, 0));
 //        System.out.println(calcLonDPP(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 512));
