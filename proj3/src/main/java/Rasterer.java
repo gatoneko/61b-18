@@ -47,7 +47,6 @@ public class Rasterer {
      *                    forget to set this to true on success! <br>
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
-        System.out.println(params);
 
         int depth = getDepth(params.get("lrlon"), params.get("ullon"), params.get("w"));
         double upLeftLon = params.get("ullon");
@@ -84,7 +83,9 @@ public class Rasterer {
         results.put("depth", depth);
         results.put("query_success", true);
 //        results = helloWorlding(results);
-        System.out.println(results);
+        System.out.println("Paramaters: " + params);
+
+        System.out.println("Results: " + results);
         return results;
     }
 
