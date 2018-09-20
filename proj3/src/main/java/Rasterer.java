@@ -65,8 +65,8 @@ public class Rasterer {
 
 
         // todo make methods half
-        Tile topLeftTile = getTopLeftTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
-        Tile bottomRightTile = getBottomRightTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
+        Tile topLeftTile = getCornerTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
+        Tile bottomRightTile = getCornerTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
 
         Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
 
@@ -135,60 +135,16 @@ public class Rasterer {
         }
         return null;
     }
-
-    private static Tile getTopLeftTile(int depth, double tileHeight, double tileWidth, double upLeftLon, double upLeftLat) {
-        int topLeftY = getTopLeftY(depth, tileHeight, upLeftLat);
-        int topLeftX = getTileLrlon(depth, tileWidth, upLeftLon);
-        Tile result = new Tile(depth, topLeftX, topLeftY);
-        result.setUllon(MapServer.ROOT_ULLON + (tileWidth * topLeftX));
-        result.setUllat(MapServer.ROOT_ULLAT - (tileHeight * topLeftY));
+    
+    private  static Tile getCornerTile(int depth, double tileHeight, double tileWidth, double queryLon, double queryLat) {
+        int tileLrlon = getTileLrlon(depth, tileWidth, queryLon);
+        int tileLrlat = getTileLrlat(depth, tileHeight, queryLat);
+        Tile result = new Tile(depth, tileLrlon, tileLrlat);
+        result.setUllon(MapServer.ROOT_ULLON + (tileWidth * tileLrlon));
+        result.setUllat(MapServer.ROOT_ULLAT - (tileHeight * tileLrlat));
+        result.setLrlon(MapServer.ROOT_ULLON + (tileWidth * (tileLrlon + 1)));
+        result.setLrlat(MapServer.ROOT_ULLAT - (tileHeight * (tileLrlat + 1)));
         return result;
-    }
-
-
-    private static int getTopLeftX(int depth, double tileWidth, double upLeftLon) {
-        int numOfTiles = (int) Math.pow(2,depth);
-        double currentBottomCorner = MapServer.ROOT_ULLON + tileWidth;
-        for (int tileIndex = 0; tileIndex < numOfTiles ; tileIndex++) {
-            if (currentBottomCorner > upLeftLon) { //todo does it matter if this is >= or > ??? Calc bottom right needed it.
-                return tileIndex;
-            }
-            currentBottomCorner += tileWidth;
-        }
-        return -1;
-    }
-
-    private static int getTopLeftY(int depth, double tileHeight, double upLeftLat) {
-        int numOfTiles = (int) Math.pow(2,depth);
-        double currentBottomCorner = MapServer.ROOT_ULLAT - tileHeight;
-        for (int tileIndex = 0; tileIndex < numOfTiles; tileIndex++) {
-            if (currentBottomCorner < upLeftLat) { //todo does it matter if this is >= or > ??? Calc bottom right needed it.
-                return tileIndex;
-            }
-            currentBottomCorner -= tileHeight;
-        }
-        return -1;
-    }
-
-    private static Tile getBottomRightTile(int depth, double tileHeight, double tileWidth, double lowRightLon, double lowRightLat) {
-        int botLeftY = getBotLeftY(depth, tileHeight, lowRightLat);
-        int botLeftX = getTileLrlon(depth, tileWidth, lowRightLon);
-        Tile result = new Tile(depth, botLeftX, botLeftY);
-        result.setLrlon(MapServer.ROOT_ULLON + (tileWidth * (botLeftX + 1)));
-        result.setLrlat(MapServer.ROOT_ULLAT - (tileHeight * (botLeftY + 1)));
-        return result;
-    }
-
-    private static int getBotLeftX(int depth, double tileWidth, double lowRightLon) {
-        int numOfTiles = (int) Math.pow(2,depth);
-        double currentBottomCorner = MapServer.ROOT_ULLON + tileWidth;
-        for (int tileIndex = 0; tileIndex < numOfTiles ; tileIndex++) {
-            if (currentBottomCorner > lowRightLon) {
-                return tileIndex;
-            }
-            currentBottomCorner += tileWidth;
-        }
-        return -1;
     }
 
     private static int getTileLrlon(int depth, double tileWidth, double queryPoint) {
@@ -203,16 +159,16 @@ public class Rasterer {
         return (numOfTiles - 1);
     }
 
-    private static int getBotLeftY(int depth, double tileHeight, double lowRightLat) {
+    private static int getTileLrlat(int depth, double tileHeight, double queryPoint) {
         int numOfTiles = (int) Math.pow(2,depth);
-        double currentBottomCorner = MapServer.ROOT_LRLAT + tileHeight;
-        for (int tileIndex = numOfTiles - 1; tileIndex >= 0; tileIndex--) {
-            if (currentBottomCorner >= lowRightLat) {
+        double currentBottomCorner = MapServer.ROOT_ULLAT - tileHeight;
+        for (int tileIndex = 0; tileIndex < numOfTiles; tileIndex++) {
+            if (currentBottomCorner < queryPoint) {
                 return tileIndex;
             }
-            currentBottomCorner += tileHeight;
+            currentBottomCorner -= tileHeight;
         }
-        return -1;
+        return (numOfTiles - 1);
     }
 
 
@@ -280,23 +236,23 @@ public class Rasterer {
     }
 
     public static void main (String[] args) {
-        int depth = 0;
-        double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
-        double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
-        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
-        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
-
-        depth = 7;
-        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
-        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
-        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.241632, 37.87655));
-        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.24054, 37.87548));
-
-        depth = 7;
-        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
-        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
-        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.21260070800781, 37.82334456722848));
-        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.2119140625, 38.82280243352756));
+//        int depth = 0;
+//        double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+//        double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+//        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
+//        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
+//
+//        depth = 7;
+//        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+//        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+//        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.241632, 37.87655));
+//        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.24054, 37.87548));
+//
+//        depth = 7;
+//        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
+//        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
+//        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.21260070800781, 37.82334456722848));
+//        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.2119140625, 38.82280243352756));
 
 //        System.out.println(sizeOfTile(ROOT_WIDTH, 0));
 //        System.out.println(calcLonDPP(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 512));
