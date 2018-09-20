@@ -54,27 +54,27 @@ public class Rasterer {
         double lowRightLon = params.get("lrlon");
         double lowRightLat = params.get("lrlat");
 
-
         double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
         double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
 
+        //This is cheap insurance for bad input. TODO test if this actually helps
+        try {
+            Tile topLeftTile = getCornerTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
+            Tile bottomRightTile = getCornerTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
 
+            Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
 
-        Tile topLeftTile        = getCornerTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
-        Tile bottomRightTile    = getCornerTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
+            String[][] tileNames = convertTilestoStrings(queryGrid);
+            Map<String, Object> results = buildResults(tileNames, topLeftTile.getUllon(), topLeftTile.getUllat(), bottomRightTile.getLrlon(), bottomRightTile.getLrlat(), depth);
 
-        Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
-
-        //todo make a method that sanitizes request. if invalid request just return a query_success = false
-
-
-        String[][] tileNames = convertTilestoStrings(queryGrid);
-        Map<String, Object> results = buildResults(tileNames, topLeftTile.getUllon(), topLeftTile.getUllat(), bottomRightTile.getLrlon(), bottomRightTile.getLrlat(), depth);
-
-        System.out.println("Paramaters: " + params);
-        System.out.println("Results: " + results);
-
-        return results;
+            System.out.println("Paramaters: " + params);
+            System.out.println("Results: " + results);
+            return results;
+        } catch (Exception e) {
+            Map<String, Object> results = new HashMap<>();
+            results.put("query_success", false);
+            return results;
+        }
     }
 
     private Map<String, Object> buildResults(String[][] tileNames, double ullon, double ullat, double lrlon, double lrlat, int depth) {
@@ -96,7 +96,7 @@ public class Rasterer {
 
         String[][] result = new String[ylength][xlength];
 
-        for (int i = 0; i < ylength; i++) {
+        for (int i = 0; i < ylength; i++) { //copy from array to result array
             for (int j = 0; j < xlength; j++) {
                 result[i][j] = queryGrid[i][j].toString();
             }
