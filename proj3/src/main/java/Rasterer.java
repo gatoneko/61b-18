@@ -59,14 +59,9 @@ public class Rasterer {
         double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
 
 
-        //todo you can refactor this to be just half the methods if you make all of your searching from the top left corner.
-        //todo put all of the functionality to get these in a separate class
-        //todo: It would make more sense to have a tile object and pass it all around
 
-
-        // todo make methods half
-        Tile topLeftTile = getCornerTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
-        Tile bottomRightTile = getCornerTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
+        Tile topLeftTile        = getCornerTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
+        Tile bottomRightTile    = getCornerTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
 
         Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
 
@@ -109,7 +104,7 @@ public class Rasterer {
         return result;
     }
 
-    private static Tile[][] getQueryGrid(int depth, Tile topLeftTile, Tile bottomRightTile) {
+    private Tile[][] getQueryGrid(int depth, Tile topLeftTile, Tile bottomRightTile) {
         int width =  bottomRightTile.getxVal() - topLeftTile.getxVal() + 1; //plus one for inclusive width/height
         int height=  bottomRightTile.getyVal() - topLeftTile.getyVal() + 1;
 
@@ -117,9 +112,7 @@ public class Rasterer {
         int startY = topLeftTile.getyVal();
 
         int currentX = startX;
-        try {
-            Tile[][] queryGrid = new Tile[height][width];
-
+        Tile[][] queryGrid = new Tile[height][width];
 
         for (int i = 0; i < height; i++){
             for (int j = 0; j < width; j++) {
@@ -130,13 +123,9 @@ public class Rasterer {
             currentX = startX;
         }
         return queryGrid;
-        } catch (Exception e) {
-            System.out.println("width: " + width + ", height: " + height);
-        }
-        return null;
     }
-    
-    private  static Tile getCornerTile(int depth, double tileHeight, double tileWidth, double queryLon, double queryLat) {
+
+    private Tile getCornerTile(int depth, double tileHeight, double tileWidth, double queryLon, double queryLat) {
         int tileLrlon = getTileLrlon(depth, tileWidth, queryLon);
         int tileLrlat = getTileLrlat(depth, tileHeight, queryLat);
         Tile result = new Tile(depth, tileLrlon, tileLrlat);
@@ -147,7 +136,7 @@ public class Rasterer {
         return result;
     }
 
-    private static int getTileLrlon(int depth, double tileWidth, double queryPoint) {
+    private int getTileLrlon(int depth, double tileWidth, double queryPoint) {
         int numOfTiles = (int) Math.pow(2,depth);
         double currentBottomCorner = MapServer.ROOT_ULLON + tileWidth;
         for (int tileIndex = 0; tileIndex < numOfTiles ; tileIndex++) {
@@ -159,7 +148,7 @@ public class Rasterer {
         return (numOfTiles - 1);
     }
 
-    private static int getTileLrlat(int depth, double tileHeight, double queryPoint) {
+    private int getTileLrlat(int depth, double tileHeight, double queryPoint) {
         int numOfTiles = (int) Math.pow(2,depth);
         double currentBottomCorner = MapServer.ROOT_ULLAT - tileHeight;
         for (int tileIndex = 0; tileIndex < numOfTiles; tileIndex++) {
@@ -172,23 +161,8 @@ public class Rasterer {
     }
 
 
-    /** Satisfies test.html through manual input */
-    private Map<String, Object> helloWorlding(Map<String, Object> results) {
-        String[][] resultGrid = {{"d7_x84_y28.png", "d7_x85_y28.png", "d7_x86_y28.png"}, {"d7_x84_y29.png", "d7_x85_y29.png", "d7_x86_y29.png"}, {"d7_x84_y30.png", "d7_x85_y30.png", "d7_x86_y30.png"}};
-
-        results.put("render_grid", resultGrid);
-        results.put("raster_ul_lon", -122.24212646484375);
-        results.put("raster_ul_lat", 37.87701580361881);
-        results.put("raster_lr_lon", -122.24006652832031);
-        results.put("raster_lr_lat", 37.87538940251607);
-        results.put("depth", 7);
-        results.put("query_success", true);
-
-        return results;
-    }
-
     /** Returns depth. from 0 to 7. -1 is error */
-    private static int getDepth(double lowRightLon, double upLeftLon, double width) { //It's odd that the size in pixels was a floating number.. you can't have half a pixel... This might be some fucked case test where a monitor with 1.5 pixels
+    private int getDepth(double lowRightLon, double upLeftLon, double width) { //It's odd that the size in pixels was a floating number.. you can't have half a pixel... This might be some fucked case test where a monitor with 1.5 pixels
         //Future todo sanitize screen size input to integers.
 
         double windowLonDPP = calcLonDPP(lowRightLon, upLeftLon, width);
@@ -210,20 +184,17 @@ public class Rasterer {
         return -1;
     }
 
-    private static double calcLonDPP(double lowRightLon, double upLeftLon, double boxWidth) { //tested
+    private double calcLonDPP(double lowRightLon, double upLeftLon, double boxWidth) { //tested
         return ((lowRightLon - upLeftLon) / boxWidth);
     }
 
-    private static double calcLowRightLon(int depth) { //tested
+    private double calcLowRightLon(int depth) { //tested
         double totalLonLength = MapServer.ROOT_ULLON - MapServer.ROOT_LRLON;
         double tileLength = totalLonLength / (Math.pow(2, depth));
         double lowRightLon = MapServer.ROOT_ULLON - tileLength;
         return lowRightLon;
     }
 
-    private static int calcNumberOfTiles(int depth, double windowUpLeftLon, double windowlowRightLon) {
-        return 0;
-    }
 
     /** returns longitudinal or latitudinal length/width of tile based on zoom level
      * Maybe I don't understand this. Maybe I'm never supposed to calculate
@@ -231,31 +202,11 @@ public class Rasterer {
      * distance of latitude is different depending where you are above/below the
      * sekidou
      * */
-    private static double sizeOfTile(double distance, int depth) {
+    private  double sizeOfTile(double distance, int depth) {
         return distance / Math.pow(2,depth);
     }
 
     public static void main (String[] args) {
-//        int depth = 0;
-//        double tileWidth = sizeOfTile(ROOT_WIDTH, depth);
-//        double tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
-//        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
-//        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, MapServer.ROOT_ULLON, MapServer.ROOT_ULLAT ));
-//
-//        depth = 7;
-//        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
-//        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
-//        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.241632, 37.87655));
-//        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.24054, 37.87548));
-//
-//        depth = 7;
-//        tileWidth = sizeOfTile(ROOT_WIDTH, depth);
-//        tileHeight = sizeOfTile(ROOT_HEIGHT, depth);
-//        System.out.println(getTopLeftTile(depth,tileHeight, tileWidth, -122.21260070800781, 37.82334456722848));
-//        System.out.println(getBottomRightTile(depth,tileHeight, tileWidth, -122.2119140625, 38.82280243352756));
 
-//        System.out.println(sizeOfTile(ROOT_WIDTH, 0));
-//        System.out.println(calcLonDPP(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 512));
-//        System.out.println(getDepth(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 513));
     }
 }
