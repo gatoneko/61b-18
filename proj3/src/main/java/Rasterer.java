@@ -64,28 +64,33 @@ public class Rasterer {
         //todo: It would make more sense to have a tile object and pass it all around
 
 
-        // you're getting wrong because you're feeding the query coordinates
+        // todo make methods half
         Tile topLeftTile = getTopLeftTile(depth, tileHeight, tileWidth, upLeftLon, upLeftLat);
         Tile bottomRightTile = getBottomRightTile(depth, tileHeight, tileWidth, lowRightLon, lowRightLat);
 
         Tile[][] queryGrid = getQueryGrid(depth, topLeftTile, bottomRightTile);
 
+        //todo make a method that sanitizes request. if invalid request just return a query_success = false
 
 
         String[][] tileNames = convertTilestoStrings(queryGrid);
+        Map<String, Object> results = buildResults(tileNames, topLeftTile.getUllon(), topLeftTile.getUllat(), bottomRightTile.getLrlon(), bottomRightTile.getLrlat(), depth);
 
+        System.out.println("Paramaters: " + params);
+        System.out.println("Results: " + results);
+
+        return results;
+    }
+
+    private Map<String, Object> buildResults(String[][] tileNames, double ullon, double ullat, double lrlon, double lrlat, int depth) {
         Map<String, Object> results = new HashMap<>();
         results.put("render_grid", tileNames);
-        results.put("raster_ul_lon", topLeftTile.getUllon());
-        results.put("raster_ul_lat", topLeftTile.getUllat());
-        results.put("raster_lr_lon", bottomRightTile.getLrlon());
-        results.put("raster_lr_lat", bottomRightTile.getLrlat());
+        results.put("raster_ul_lon", ullon);
+        results.put("raster_ul_lat", ullat);
+        results.put("raster_lr_lon", lrlon);
+        results.put("raster_lr_lat", lrlat);
         results.put("depth", depth);
         results.put("query_success", true);
-//        results = helloWorlding(results);
-        System.out.println("Paramaters: " + params);
-
-        System.out.println("Results: " + results);
         return results;
     }
 
