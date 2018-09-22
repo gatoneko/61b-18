@@ -68,7 +68,7 @@ public class GraphBuildingHandler extends DefaultHandler {
         if (qName.equals("node")) {
             /* We encountered a new <node...> tag. */
             activeState = "node";
-//            System.out.println("Node id: " + attributes.getValue("id"));
+            System.out.println("Node id: " + attributes.getValue("id"));
 //            System.out.println("Node lon: " + attributes.getValue("lon"));
 //            System.out.println("Node lat: " + attributes.getValue("lat"));
 
@@ -98,7 +98,7 @@ public class GraphBuildingHandler extends DefaultHandler {
                 //System.out.println("Max Speed: " + v);
                 /* TODO set the max speed of the "current way" here. */
             } else if (k.equals("highway")) {
-                //System.out.println("Highway type: " + v);
+                System.out.println("Highway type: " + v);
                 /* TODO Figure out whether this way and its connections are valid. */
                 /* Hint: Setting a "flag" is good enough! */
             } else if (k.equals("name")) {
