@@ -6,7 +6,7 @@ public class Node {
     private double lon;
     private double lat;
     private String name;
-    private List<Edge> partOfEdges;
+//    private List<Edge> partOfEdges;
     private List<Node> adjacentNodes;
 
     public boolean isConnected() {

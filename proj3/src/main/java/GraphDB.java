@@ -1,3 +1,4 @@
+//import com.sun.javafx.geom.Edge; todo compare previous commits, i might have accidentally made intellij add this.
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -7,6 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
+    private HashMap<Long, Node> nodes;
+//    private HashMap<Long, Edge> edges;
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -27,6 +31,7 @@ public class GraphDB {
      * @param dbPath Path to the XML file to be parsed.
      */
     public GraphDB(String dbPath) {
+        nodes = new HashMap<>();
         try {
             File inputFile = new File(dbPath);
             FileInputStream inputStream = new FileInputStream(inputFile);
@@ -155,5 +160,9 @@ public class GraphDB {
      */
     double lat(long v) {
         return 0;
+    }
+
+    public void addNode(long id, double lon, double lat) {
+        nodes.put(id, new Node(id, lon, lat));
     }
 }
