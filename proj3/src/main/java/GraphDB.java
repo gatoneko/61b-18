@@ -64,13 +64,13 @@ public class GraphDB {
      *  we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-//        ArrayList<Node> nodeValues = new ArrayList<Node>(nodes.values());
-//        for (Node n : nodeValues) {
-//            if (!n.isConnected() && n.getName() == null) {
-//                nodes.remove(n.getId());
-//            }
-//        }
-//        System.out.println("cleaned!");
+        ArrayList<Node> nodeValues = new ArrayList<Node>(nodes.values());
+        for (Node n : nodeValues) {
+            if (!n.isConnected() && n.getName() == null) {
+                nodes.remove(n.getId());
+            }
+        }
+        System.out.println("cleaned!");
     }
 
     /**
