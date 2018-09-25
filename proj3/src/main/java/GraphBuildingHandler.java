@@ -2,6 +2,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +39,11 @@ public class GraphBuildingHandler extends DefaultHandler {
                     "secondary_link", "tertiary_link"));
     private String activeState = "";
     private final GraphDB g;
+    private ArrayList<Long> provisionalNodesID;
+    boolean isValidHighway = false;
+    Long elementID;
+    String elementName;
+
 
     /**
      * Create a new GraphBuildingHandler.
@@ -64,7 +70,6 @@ public class GraphBuildingHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes)
             throws SAXException {
-        boolean isValidHighway = false;
         /* Some example code on how you might begin to parse XML files. */
         if (qName.equals("node")) {
             /* We encountered a new <node...> tag. */
@@ -80,14 +85,17 @@ public class GraphBuildingHandler extends DefaultHandler {
                     Float.parseFloat(attributes.getValue("lon")),
                     Float.parseFloat(attributes.getValue("lat"))
             );
+            // TODO You'll need to add tags like "highway crossing" I think.. How are intersections described in this graph?
 
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */
+            provisionalNodesID = new ArrayList<>();
+            elementID = Long.parseLong(attributes.getValue("id"));
             activeState = "way";
             System.out.println("Beginning a way...");
         } else if (activeState.equals("way") && qName.equals("nd")) {
             /* While looking at a way, we found a <nd...> tag. */
-            //System.out.println("Id of a node in this way: " + attributes.getValue("ref"));
+//            System.out.println("Id of a node in this way: " + attributes.getValue("ref"));
 
             /* TODO Use the above id to make "possible" connections between the nodes in this way */
             /* Hint1: It would be useful to remember what was the last node in this way. */
@@ -95,6 +103,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             cumbersome since you might have to remove the connections if you later see a tag that
             makes this way invalid. Instead, think of keeping a list of possible connections and
             remember whether this way is valid or not. */
+            provisionalNodesID.add(Long.parseLong(attributes.getValue("ref")));
 
         } else if (activeState.equals("way") && qName.equals("tag")) {
             /* While looking at a way, we found a <tag...> tag. */
@@ -107,8 +116,15 @@ public class GraphBuildingHandler extends DefaultHandler {
                 System.out.println("Highway type: " + v);
                 /* TODO Figure out whether this way and its connections are valid. */
                 /* Hint: Setting a "flag" is good enough! */
+                if (ALLOWED_HIGHWAY_TYPES.contains(v)) {
+                    isValidHighway = true;
+                } else {
+//                    System.out.println("Throwing this way away! ");
+//                    System.out.println("ID: " + elementID);
+                }
             } else if (k.equals("name")) {
-                //System.out.println("Way Name: " + v);
+                System.out.println("Way Name: " + v);
+                elementName = v;
             }
 //            System.out.println("Tag with k=" + k + ", v=" + v + ".");
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k")
@@ -139,8 +155,20 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* We are done looking at a way. (We finished looking at the nodes, speeds, etc...)*/
             /* Hint1: If you have stored the possible connections for this way, here's your
             chance to actually connect the nodes together if the way is valid. */
-//            System.out.println("Finishing a way...");
+            System.out.println("Finishing a way...");
+            if (isValidHighway) {
+                Edge edge = g.addEdge(elementID, provisionalNodesID);
+                if (elementName != null) {
+                    edge.setName(elementName);
+                }
+//                edge = g.addEdge(elementID, edge);
+                isValidHighway = !isValidHighway;
+            }
+        } else {
+
         }
+
+        elementName = null;
     }
 
 }

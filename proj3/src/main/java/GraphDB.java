@@ -23,7 +23,7 @@ public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
     private HashMap<Long, Node> nodes;
-//    private HashMap<Long, Edge> edges;
+    private HashMap<Long, Edge> edges;
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -32,6 +32,7 @@ public class GraphDB {
      */
     public GraphDB(String dbPath) {
         nodes = new HashMap<>();
+        edges = new HashMap<>();
         try {
             File inputFile = new File(dbPath);
             FileInputStream inputStream = new FileInputStream(inputFile);
@@ -164,5 +165,24 @@ public class GraphDB {
 
     public void addNode(long id, double lon, double lat) {
         nodes.put(id, new Node(id, lon, lat));
+    }
+
+    public Edge addEdge(Long id, Edge edge) {
+        edges.put(id, edge);
+        return edge;
+    }
+
+    public Edge addEdge(long id, ArrayList<Long> way) {
+        ArrayList<Node> provisionalNodes = new ArrayList<>();
+        for (Long ndRef : way) {
+            provisionalNodes.add(nodes.get(ndRef));
+        }
+        return addEdgeWithNodes(id, provisionalNodes);
+    }
+
+    private Edge addEdgeWithNodes(long id, ArrayList<Node> way) {
+        Edge edge = new Edge(id, way);
+        edges.put(id, edge);
+        return edge;
     }
 }
