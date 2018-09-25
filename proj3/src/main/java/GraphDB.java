@@ -8,6 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -63,7 +64,13 @@ public class GraphDB {
      *  we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        // TODO: Your code here.
+//        ArrayList<Node> nodeValues = new ArrayList<Node>(nodes.values());
+//        for (Node n : nodeValues) {
+//            if (!n.isConnected() && n.getName() == null) {
+//                nodes.remove(n.getId());
+//            }
+//        }
+//        System.out.println("cleaned!");
     }
 
     /**
@@ -72,7 +79,13 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-        return new ArrayList<Long>();
+       ArrayList<Node> n = new ArrayList<Node>(nodes.values());
+       ArrayList<Long> ids = new ArrayList<>(n.size());
+       for (Node node : n) {
+           ids.add(node.getId());
+       }
+//        ArrayList<Long> a = new ArrayList<>();
+       return ids;
     }
 
     /**
@@ -151,7 +164,7 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return 0;
+        return nodes.containsKey(v) ? nodes.get(v).getLon() : 0; //0 means invalid input
     }
 
     /**
@@ -160,17 +173,21 @@ public class GraphDB {
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return 0;
+        return nodes.containsKey(v) ? nodes.get(v).getLat() : 0;
     }
 
-    public void addNode(long id, double lon, double lat) {
-        nodes.put(id, new Node(id, lon, lat));
+    public Node addNode(long id, double lon, double lat) {
+        Node result = new Node(id, lon, lat);
+        nodes.put(id, result);
+        return result;
     }
 
-    public Edge addEdge(Long id, Edge edge) {
-        edges.put(id, edge);
-        return edge;
-    }
+    public void removeNode(long id) {};
+
+//    public Edge addEdge(Long id, Edge edge) {
+//        edges.put(id, edge);
+//        return edge;
+//    }
 
     public Edge addEdge(long id, ArrayList<Long> way) {
         ArrayList<Node> provisionalNodes = new ArrayList<>();
@@ -183,6 +200,21 @@ public class GraphDB {
     private Edge addEdgeWithNodes(long id, ArrayList<Node> way) {
         Edge edge = new Edge(id, way);
         edges.put(id, edge);
+        for(Node node : way) {
+            node.addEdge(edge);
+        }
         return edge;
+    }
+
+    public Node getNode(Long id) {
+        return nodes.get(id);
+    }
+
+    public Edge getEdge(Long id) {
+        return edges.get(id);
+    }
+
+    public int getNodeSize() {
+        return nodes.size();
     }
 }
