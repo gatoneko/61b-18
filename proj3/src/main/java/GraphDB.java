@@ -9,7 +9,6 @@ import javax.xml.parsers.SAXParserFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -24,11 +23,8 @@ public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Way, etc. */
 
-    /* TODO i think you can implement this with either a hashmap or a linkedlist */
     private HashMap<Long, Node> nodes;
     private HashMap<Long, Way> ways;
-    private LinkedList<Node> graph;
-
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
@@ -37,7 +33,6 @@ public class GraphDB {
     public GraphDB(String dbPath) {
         nodes = new HashMap<>();
         ways = new HashMap<>();
-        graph = new LinkedList<>();
         try {
             File inputFile = new File(dbPath);
             FileInputStream inputStream = new FileInputStream(inputFile);
@@ -50,8 +45,7 @@ public class GraphDB {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
-        populateGraph(); //nodes --> graph
-        convertWaystoGraph(); //ways --> nodes.adjacent in graph
+        convertWaysToGraph(); //ways --> nodes.adjacent in graph
         clean();
     }
 
@@ -72,11 +66,11 @@ public class GraphDB {
     private void clean() {
         /* This removes all unconnected nodes, even ones like intersections and buildings */
         /* TODO this should delegate removal to removeNode(). Also figure out hashmap vs list */
-        Iterator<Node> i = this.graph.iterator();
+        Iterator<Node> i = this.nodes.values().iterator();
         while (i.hasNext()) {
             Node n = i.next();
             if (!n.isConnected()) {
-                removeNode(n, i);
+                i.remove();
             }
         }
     }
@@ -88,9 +82,9 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-       ArrayList<Node> n = new ArrayList<>(this.graph);
-       ArrayList<Long> ids = new ArrayList<>(n.size());
-       for (Node node : n) {
+       ArrayList<Node> listOfNodes = new ArrayList<>(this.nodes.values());
+       ArrayList<Long> ids = new ArrayList<>(listOfNodes.size());
+       for (Node node : listOfNodes) {
            ids.add(node.getId());
        }
        return ids;
@@ -180,7 +174,7 @@ public class GraphDB {
         Node query = new Node(-1L, lon, lat);
         Node closestNode = new Node(-1L, 0,0);
         double closestDistance = 999999999;
-        for (Node n : this.graph) {
+        for (Node n : this.nodes.values()) {
             double currentDistance = distance(n, query);
             if (currentDistance < closestDistance) {
                 closestNode = n;
@@ -216,23 +210,11 @@ public class GraphDB {
         return result;
     }
 
-    private void removeNode(Node n, Iterator<Node> i) {
+    private void removeNode(Node n) {
         this.nodes.remove(n.getId());
-        i.remove();
     }
 
-//    public void removeNode(Node n) {
-//        this.nodes.remove(n.getId());
-//        this.graph.remove(n);
-//    }
-
-    public void populateGraph() {
-        for (Node n : nodes.values()) {
-            graph.add(n);
-        }
-    }
-
-    public void convertWaystoGraph() {
+    public void convertWaysToGraph() {
         for (Way way: this.ways.values()) {
             ArrayList<Node> listOfNodes = way.getWay();
             addNeighbors(listOfNodes);
@@ -273,6 +255,6 @@ public class GraphDB {
     }
 
     public int getNodeSize() {
-        return this.graph.size();
+        return this.nodes.size();
     }
 }
