@@ -11,12 +11,12 @@ public class Node {
     private List<Way> partOfWays;
     private List<Node> adjacentNodes;
 
-//    public boolean isConnected() {
-//        return !adjacentNodes.isEmpty();
-//    }
     public boolean isConnected() {
-        return !partOfEdges.isEmpty();
+        return !adjacentNodes.isEmpty();
     }
+//    public boolean isConnected() {
+//        return !partOfEdges.isEmpty();
+//    }
 
     public Node(long id, double lon, double lat) {
         this.id = id;

@@ -8,6 +8,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -23,7 +25,7 @@ public class GraphDB {
      * creating helper classes, e.g. Node, Way, etc. */
     private HashMap<Long, Node> nodes;
     private HashMap<Long, Way> ways;
-    private ArrayList<Node> graph;
+    private LinkedList<Node> graph;
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -33,7 +35,7 @@ public class GraphDB {
     public GraphDB(String dbPath) {
         nodes = new HashMap<>();
         ways = new HashMap<>();
-        graph = new ArrayList<>();
+        graph = new LinkedList<>();
         try {
             File inputFile = new File(dbPath);
             FileInputStream inputStream = new FileInputStream(inputFile);
@@ -66,13 +68,16 @@ public class GraphDB {
      *  we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-//        ArrayList<Node> nodeValues = new ArrayList<Node>(nodes.values());
-//        for (Node n : nodeValues) {
-//            if (!n.isConnected() && n.getName() == null) {
-//                nodes.remove(n.getId());
-//            }
-//        }
-//        System.out.println("cleaned!");
+        /** This removes all unconnected nodes, even ones like intersections and buildings */
+
+        Iterator<Node> i = graph.iterator();
+        while (i.hasNext()) {
+            Node n = i.next();
+            if (!n.isConnected()) {
+                i.remove();
+            }
+        }
+        System.out.println("cleaned!");
     }
 
     /**
@@ -239,6 +244,6 @@ public class GraphDB {
     }
 
     public int getNodeSize() {
-        return nodes.size();
+        return this.graph.size();
     }
 }
