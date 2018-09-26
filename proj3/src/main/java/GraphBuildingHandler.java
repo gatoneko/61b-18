@@ -159,9 +159,9 @@ public class GraphBuildingHandler extends DefaultHandler {
             chance to actually connect the nodes together if the way is valid. */
 //            System.out.println("Finishing a way...");
             if (isValidHighway) {
-                Edge edge = g.addEdge(elementID, provisionalNodesID);
+                Way way = g.addWay(elementID, provisionalNodesID);
                 if (wayName != null) {
-                    edge.setName(wayName);
+                    way.setName(wayName);
                     wayName = null;
                 }
 //                edge = g.addEdge(elementID, edge);

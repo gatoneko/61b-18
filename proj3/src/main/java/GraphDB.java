@@ -1,4 +1,3 @@
-//import com.sun.javafx.geom.Edge; todo compare previous commits, i might have accidentally made intellij add this.
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -8,7 +7,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -22,9 +20,10 @@ import java.util.HashMap;
  */
 public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
-     * creating helper classes, e.g. Node, Edge, etc. */
+     * creating helper classes, e.g. Node, Way, etc. */
     private HashMap<Long, Node> nodes;
-    private HashMap<Long, Edge> edges;
+    private HashMap<Long, Way> ways;
+    private ArrayList<Node> graph;
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -33,7 +32,8 @@ public class GraphDB {
      */
     public GraphDB(String dbPath) {
         nodes = new HashMap<>();
-        edges = new HashMap<>();
+        ways = new HashMap<>();
+        graph = new ArrayList<>();
         try {
             File inputFile = new File(dbPath);
             FileInputStream inputStream = new FileInputStream(inputFile);
@@ -46,6 +46,8 @@ public class GraphDB {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
+        populateGraph();
+        convertWaystoGraph();
         clean();
     }
 
@@ -64,13 +66,13 @@ public class GraphDB {
      *  we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        ArrayList<Node> nodeValues = new ArrayList<Node>(nodes.values());
-        for (Node n : nodeValues) {
-            if (!n.isConnected() && n.getName() == null) {
-                nodes.remove(n.getId());
-            }
-        }
-        System.out.println("cleaned!");
+//        ArrayList<Node> nodeValues = new ArrayList<Node>(nodes.values());
+//        for (Node n : nodeValues) {
+//            if (!n.isConnected() && n.getName() == null) {
+//                nodes.remove(n.getId());
+//            }
+//        }
+//        System.out.println("cleaned!");
     }
 
     /**
@@ -184,34 +186,56 @@ public class GraphDB {
 
     public void removeNode(long id) {};
 
-//    public Edge addEdge(Long id, Edge edge) {
-//        edges.put(id, edge);
-//        return edge;
+//    public Way addWay(Long id, Way way) {
+//        ways.put(id, way);
+//        return way;
 //    }
 
-    public Edge addEdge(long id, ArrayList<Long> way) {
-        ArrayList<Node> provisionalNodes = new ArrayList<>();
-        for (Long ndRef : way) {
-            provisionalNodes.add(nodes.get(ndRef));
+    public void populateGraph() {
+        for (Node n : nodes.values()) {
+            graph.add(n);
         }
-        return addEdgeWithNodes(id, provisionalNodes);
     }
 
-    private Edge addEdgeWithNodes(long id, ArrayList<Node> way) {
-        Edge edge = new Edge(id, way);
-        edges.put(id, edge);
-        for(Node node : way) {
-            node.addEdge(edge);
+    public void convertWaystoGraph() {
+        for (Way way: this.ways.values()) {
+            ArrayList<Node> listOfNodes = way.getWay();
+            addNeighbors(listOfNodes);
         }
-        return edge;
+    }
+
+    public void addNeighbors(ArrayList<Node> way) {
+        if (way.size() <= 1) {return;}
+        for (int i = 0; i < way.size() - 1; i++) {
+            way.get(i).addNeighbor(way.get(i + 1));
+            way.get(i + 1).addNeighbor(way.get(i));
+        }
+
+    }
+
+    public Way addWay(long id, ArrayList<Long> listOfLongs) {
+        ArrayList<Node> provisionalNodes = new ArrayList<>();
+        for (Long ndRef : listOfLongs) {
+            provisionalNodes.add(nodes.get(ndRef));
+        }
+        return addWayWithNodes(id, provisionalNodes);
+    }
+
+    private Way addWayWithNodes(long id, ArrayList<Node> listOfNodes) {
+        Way way = new Way(id, listOfNodes);
+        this.ways.put(id, way);
+        for(Node node : listOfNodes) {
+            node.addWay(way);
+        }
+        return way;
     }
 
     public Node getNode(Long id) {
         return nodes.get(id);
     }
 
-    public Edge getEdge(Long id) {
-        return edges.get(id);
+    public Way getWay(Long id) {
+        return this.ways.get(id);
     }
 
     public int getNodeSize() {

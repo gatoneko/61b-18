@@ -8,6 +8,7 @@ public class Node {
     private double lat;
     private String name;
     private List<Edge> partOfEdges;
+    private List<Way> partOfWays;
     private List<Node> adjacentNodes;
 
 //    public boolean isConnected() {
@@ -22,6 +23,16 @@ public class Node {
         this.lon = lon;
         this.lat = lat;
         this.partOfEdges = new ArrayList<>();
+        this.partOfWays = new ArrayList<>();
+        this.adjacentNodes = new ArrayList<>();
+    }
+
+    public void addNeighbor(Node n) {
+        adjacentNodes.add(n);
+    }
+
+    public void addWay(Way w) {
+        partOfWays.add(w);
     }
 
     public void addEdge(Edge e) {
