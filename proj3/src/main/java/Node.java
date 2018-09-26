@@ -24,16 +24,12 @@ public class Node {
         this.adjacentNodes = new ArrayList<>();
     }
 
-    public void addNeighbor(Node n) {
+    public void addEdge(Node n) {
         adjacentNodes.add(n);
     }
 
     public void addWay(Way w) {
         partOfWays.add(w);
-    }
-
-    public void addEdge(Edge e) {
-        partOfEdges.add(e);
     }
 
     public String getName() {

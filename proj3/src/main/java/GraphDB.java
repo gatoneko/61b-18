@@ -45,7 +45,6 @@ public class GraphDB {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
-        convertWaysToGraph(); //ways --> nodes.adjacent in graph
         clean();
     }
 
@@ -65,16 +64,14 @@ public class GraphDB {
      */
     private void clean() {
         /* This removes all unconnected nodes, even ones like intersections and buildings */
-        /* TODO this should delegate removal to removeNode(). Also figure out hashmap vs list */
+        /* 2018/9/26 deciding to not call removeNode()*/
         Iterator<Node> i = this.nodes.values().iterator();
         while (i.hasNext()) {
-            Node n = i.next();
-            if (!n.isConnected()) {
+            if (!i.next().isConnected()) {
                 i.remove();
             }
         }
     }
-
 
     /**
      * Returns an iterable of all vertex IDs in the graph.
@@ -202,7 +199,6 @@ public class GraphDB {
         return this.nodes.containsKey(v) ? this.nodes.get(v).getLat() : -1;
     }
 
-    /* TODO There is massive codesmell with having three hashmaps to handle all of this */
 
     public Node addNode(long id, double lon, double lat) {
         Node result = new Node(id, lon, lat);
@@ -214,35 +210,24 @@ public class GraphDB {
         this.nodes.remove(n.getId());
     }
 
-    public void convertWaysToGraph() {
-        for (Way way: this.ways.values()) {
-            ArrayList<Node> listOfNodes = way.getWay();
-            addNeighbors(listOfNodes);
-        }
-    }
-
-    public void addNeighbors(ArrayList<Node> way) {
+    public void addEdges(ArrayList<Node> way) {
         if (way.size() <= 1) {return;}
         for (int i = 0; i < way.size() - 1; i++) {
-            way.get(i).addNeighbor(way.get(i + 1));
-            way.get(i + 1).addNeighbor(way.get(i));
+            way.get(i).addEdge(way.get(i + 1));
+            way.get(i + 1).addEdge(way.get(i));
         }
     }
 
     public Way addWay(long id, ArrayList<Long> listOfLongs) {
-        ArrayList<Node> provisionalNodes = new ArrayList<>();
+        Way way = new Way(id);
+        Node currentNode;
         for (Long ndRef : listOfLongs) {
-            provisionalNodes.add(nodes.get(ndRef));
+            currentNode = this.nodes.get(ndRef);
+            way.addNode(currentNode);
+            currentNode.addWay(way); //adds the way to the Node's list of ways its in
         }
-        return addWayWithNodes(id, provisionalNodes);
-    }
-
-    private Way addWayWithNodes(long id, ArrayList<Node> listOfNodes) {
-        Way way = new Way(id, listOfNodes);
-        this.ways.put(id, way);
-        for(Node node : listOfNodes) {
-            node.addWay(way);
-        }
+        this.ways.put(id, way); //saves way in hashmap
+        addEdges(way.getWay());//creates edges between nodes
         return way;
     }
 
