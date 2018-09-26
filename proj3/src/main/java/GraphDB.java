@@ -86,12 +86,11 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-       ArrayList<Node> n = new ArrayList<Node>(nodes.values());
+       ArrayList<Node> n = new ArrayList<Node>(this.graph);
        ArrayList<Long> ids = new ArrayList<>(n.size());
        for (Node node : n) {
            ids.add(node.getId());
        }
-//        ArrayList<Long> a = new ArrayList<>();
        return ids;
     }
 
@@ -107,6 +106,12 @@ public class GraphDB {
             result.add(node.getId());
         }
         return result;
+    }
+
+
+    /** CY distance comparing nodes */
+    double distance(Node v, Node w) {
+        return distance(v.getLon(), v.getLat(), w.getLon(), w.getLat());
     }
 
     /**
@@ -167,7 +172,17 @@ public class GraphDB {
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        return 0;
+        Node query = new Node(-1L, lon, lat);
+        Node closestNode = new Node(-1L, 0,0);
+        double closestDistance = 999999999;
+        for (Node n : this.graph) {
+            double currentDistance = distance(n, query);
+            if (currentDistance < closestDistance) {
+                closestNode = n;
+                closestDistance = currentDistance;
+            }
+        }
+        return closestNode.getId();
     }
 
     /**
@@ -194,7 +209,7 @@ public class GraphDB {
         return result;
     }
 
-    public void removeNode(long id) {};
+    public void removeNode(long id) {}
 
 //    public Way addWay(Long id, Way way) {
 //        ways.put(id, way);
