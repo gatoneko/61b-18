@@ -79,10 +79,16 @@ public class GraphBuildingHandler extends DefaultHandler {
 
             /* TODO Use the above information to save a "node" to somewhere. */
             /* Hint: A graph-like structure would be nice. */
+//            currentNode = g.addNode(
+//                    Long.parseLong(attributes.getValue("id")),
+//                    Float.parseFloat(attributes.getValue("lon")),
+//                    Float.parseFloat(attributes.getValue("lat"))
+//            );
+            //Seeing if double precision matters
             currentNode = g.addNode(
                     Long.parseLong(attributes.getValue("id")),
-                    Float.parseFloat(attributes.getValue("lon")),
-                    Float.parseFloat(attributes.getValue("lat"))
+                    Double.parseDouble(attributes.getValue("lon")),
+                    Double.parseDouble(attributes.getValue("lat"))
             );
             elementID = Long.parseLong(attributes.getValue("id"));
             // TODO You'll need to add tags like "highway crossing" I think.. How are intersections described in this graph?
