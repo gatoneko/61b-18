@@ -58,4 +58,8 @@ public class Node {
     public long getId() {
         return id;
     }
+
+    public List<Node> getAdjacentNodes() {
+        return adjacentNodes;
+    }
 }

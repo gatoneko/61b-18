@@ -101,7 +101,12 @@ public class GraphDB {
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        return null;
+        ArrayList<Node> adjacentNodes = new ArrayList<>(this.nodes.get(v).getAdjacentNodes());
+        ArrayList<Long> result = new ArrayList<>();
+        for (Node node : adjacentNodes) {
+            result.add(node.getId());
+        }
+        return result;
     }
 
     /**
