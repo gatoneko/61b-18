@@ -14,9 +14,6 @@ public class Node {
     public boolean isConnected() {
         return !adjacentNodes.isEmpty();
     }
-//    public boolean isConnected() {
-//        return !partOfEdges.isEmpty();
-//    }
 
     public Node(long id, double lon, double lat) {
         this.id = id;

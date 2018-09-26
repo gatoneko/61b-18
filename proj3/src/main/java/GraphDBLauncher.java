@@ -35,8 +35,8 @@ public class GraphDBLauncher {
         System.out.println(" has longitude, latitude of: " + g.lon(v) + ", " + g.lat(v));
 
         System.out.println("To get started, uncomment print statements in GraphBuildingHandler.");
-        System.out.println("Chaat Café: " + g.getNode((long)541001019).getName());
-        System.out.println("Prince Street: " + g.getWay((long)6344484).getName());
+//        System.out.println("Chaat Café: " + g.getNode((long)541001019).getName());
+//        System.out.println("Prince Street: " + g.getWay((long)6344484).getName());
         System.out.println("id4691008868's lon is -122.2648893: " + g.lon(4691008868L));
         System.out.println("id4691008868's lat is 37.8314504: " + g.lat(4691008868L));
         Iterable<Long> ids = g.vertices();

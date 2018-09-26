@@ -23,6 +23,8 @@ import java.util.LinkedList;
 public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Way, etc. */
+
+    /* TODO i think you can implement this with either a hashmap or a linkedlist */
     private HashMap<Long, Node> nodes;
     private HashMap<Long, Way> ways;
     private LinkedList<Node> graph;
@@ -48,8 +50,8 @@ public class GraphDB {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
-        populateGraph();
-        convertWaystoGraph();
+        populateGraph(); //nodes --> graph
+        convertWaystoGraph(); //ways --> nodes.adjacent in graph
         clean();
     }
 
@@ -68,17 +70,17 @@ public class GraphDB {
      *  we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        /** This removes all unconnected nodes, even ones like intersections and buildings */
-
-        Iterator<Node> i = graph.iterator();
+        /* This removes all unconnected nodes, even ones like intersections and buildings */
+        /* TODO this should delegate removal to removeNode(). Also figure out hashmap vs list */
+        Iterator<Node> i = this.graph.iterator();
         while (i.hasNext()) {
             Node n = i.next();
             if (!n.isConnected()) {
-                i.remove();
+                removeNode(n, i);
             }
         }
-        System.out.println("cleaned!");
     }
+
 
     /**
      * Returns an iterable of all vertex IDs in the graph.
@@ -86,7 +88,7 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-       ArrayList<Node> n = new ArrayList<Node>(this.graph);
+       ArrayList<Node> n = new ArrayList<>(this.graph);
        ArrayList<Long> ids = new ArrayList<>(n.size());
        for (Node node : n) {
            ids.add(node.getId());
@@ -108,8 +110,11 @@ public class GraphDB {
         return result;
     }
 
-
-    /** CY distance comparing nodes */
+    /* TODO isn't that codesmelly ? */
+    /** CY distance comparing nodes
+     * I'm using this because I find closest by making a node that isn't part
+     * of the graph. So we need to compare two nodes where one isn't in the graph
+     */
     double distance(Node v, Node w) {
         return distance(v.getLon(), v.getLat(), w.getLon(), w.getLat());
     }
@@ -191,7 +196,7 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return nodes.containsKey(v) ? nodes.get(v).getLon() : 0; //0 means invalid input
+        return this.nodes.containsKey(v) ? this.nodes.get(v).getLon() : -1; //-1 means invalid input
     }
 
     /**
@@ -200,8 +205,10 @@ public class GraphDB {
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return nodes.containsKey(v) ? nodes.get(v).getLat() : 0;
+        return this.nodes.containsKey(v) ? this.nodes.get(v).getLat() : -1;
     }
+
+    /* TODO There is massive codesmell with having three hashmaps to handle all of this */
 
     public Node addNode(long id, double lon, double lat) {
         Node result = new Node(id, lon, lat);
@@ -209,11 +216,14 @@ public class GraphDB {
         return result;
     }
 
-    public void removeNode(long id) {}
+    private void removeNode(Node n, Iterator<Node> i) {
+        this.nodes.remove(n.getId());
+        i.remove();
+    }
 
-//    public Way addWay(Long id, Way way) {
-//        ways.put(id, way);
-//        return way;
+//    public void removeNode(Node n) {
+//        this.nodes.remove(n.getId());
+//        this.graph.remove(n);
 //    }
 
     public void populateGraph() {
@@ -235,7 +245,6 @@ public class GraphDB {
             way.get(i).addNeighbor(way.get(i + 1));
             way.get(i + 1).addNeighbor(way.get(i));
         }
-
     }
 
     public Way addWay(long id, ArrayList<Long> listOfLongs) {
