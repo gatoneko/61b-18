@@ -31,7 +31,7 @@ public class Router {
         PQNode startNode = new PQNode(g.getNode(g.closest(stlon, stlat)));
         PQNode destinationNode = new PQNode(g.getNode(g.closest(destlon, destlat)));
         LinkedList<Long> result = new LinkedList<>();
-        if (startNode.getNode() == null || destinationNode.getNode() == null) {
+        if (startNode.getNode() == null || destinationNode.getNode() == null) { //path to nowhere gets empty list
             return result;
         }
         /*todo this can all be broken into methods i think*/
