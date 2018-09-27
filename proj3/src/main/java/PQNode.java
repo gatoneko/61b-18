@@ -1,9 +1,16 @@
+import java.util.List;
+
 public class PQNode implements Comparable<PQNode> {
-    Node node;
-    double distance;
+    private Node node;
+    private double distance;
 
     public PQNode(Node node) {
         this.node = node;
+    }
+
+    public PQNode(Node node, double distance) {
+    this.node = node;
+    this.distance = distance;
     }
 
     public Node getNode() {
@@ -20,6 +27,14 @@ public class PQNode implements Comparable<PQNode> {
 
     public void setDistance(double distance) {
         this.distance = distance;
+    }
+
+    public long getID() {
+        return this.node.getId();
+    }
+
+    public List<Node> getAdjacentNodes() {
+        return this.node.getAdjacentNodes();
     }
 
     @Override

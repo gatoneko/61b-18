@@ -1,5 +1,4 @@
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,8 +24,44 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        return null; // FIXME
+        HashMap<Long, Double> distTo = new HashMap<>();
+        HashMap<Long, Long> edgeTo = new HashMap<>();
+        PriorityQueue<PQNode> fringe = new PriorityQueue<>();
+        PQNode startNode = new PQNode(g.getNode(g.closest(stlon, stlat)));
+        PQNode destinationNode = new PQNode(g.getNode(g.closest(destlon, destlat)));
+        LinkedList<Long> result = new LinkedList<>();
+        /*todo this can all be broken into methods i think*/
+        fringe.add(startNode);
+        distTo.put(startNode.getID(), 0.0);
+        edgeTo.put(startNode.getID(), null);
+        while (!fringe.isEmpty()) {
+            PQNode top = fringe.poll();
+            if (top.getID() == destinationNode.getID()) {
+                break;
+            }
+            List<Node> adjacentNodes = top.getAdjacentNodes();
+            for (Node node: adjacentNodes) {
+//                relaxEdge(top, node, distTo, edgeTo, fringe, startNode);
+                double distanceNodeToStart = top.getDistance() + g.distance(top.getID(), node.getId());
+                if (distTo.get(node.getId()) == null || distanceNodeToStart < distTo.get(node.getId())) {
+                    distTo.put(node.getId(), distanceNodeToStart);
+                    edgeTo.put(node.getId(), top.getID());
+                }
+                fringe.add(new PQNode(node, distanceNodeToStart));
+            }
+        }
+        Long currentNode = destinationNode.getID();
+        result.addFirst(currentNode);
+        while (currentNode != startNode.getID()) {
+            result.addFirst(edgeTo.get(currentNode));
+            currentNode = edgeTo.get(currentNode);
+        }
+        return result; // FIXME
     }
+
+//    private static void relaxEdge(PQNode top, Node node, HashMap<Long, Double> distTo, HashMap<Long, Long> edgeTo, PriorityQueue<PQNode> fringe, PQNode startNode) {
+//        double edgeDistanceToStart = top.getDistance() +
+//    }
 
     /**
      * Create the list of directions corresponding to a route on the graph.
