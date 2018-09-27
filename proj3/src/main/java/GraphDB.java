@@ -25,6 +25,7 @@ public class GraphDB {
 
     private HashMap<Long, Node> nodes;
     private HashMap<Long, Way> ways;
+    private HashMap<Long, Node> locations;//todo add locations
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
@@ -33,6 +34,8 @@ public class GraphDB {
     public GraphDB(String dbPath) {
         nodes = new HashMap<>();
         ways = new HashMap<>();
+        locations = new HashMap<>();
+
         try {
             File inputFile = new File(dbPath);
             FileInputStream inputStream = new FileInputStream(inputFile);
@@ -229,6 +232,11 @@ public class GraphDB {
         this.ways.put(id, way); //saves way in hashmap
         addEdges(way.getWay());//creates edges between nodes
         return way;
+    }
+
+    public Node addLocation(Node n) {
+        locations.put(n.getId(), n);
+        return n;
     }
 
     public Node getNode(Long id) {
