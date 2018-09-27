@@ -24,8 +24,10 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
+        System.out.println("called");
         HashMap<Long, Double> distTo = new HashMap<>();
         HashMap<Long, Long> edgeTo = new HashMap<>();
+        HashMap<Long, Boolean> marked = new HashMap<>();
         PriorityQueue<PQNode> fringe = new PriorityQueue<>();
         PQNode startNode = new PQNode(g.getNode(g.closest(stlon, stlat)));
         PQNode destinationNode = new PQNode(g.getNode(g.closest(destlon, destlat)));
@@ -36,6 +38,9 @@ public class Router {
         edgeTo.put(startNode.getID(), null);
         while (!fringe.isEmpty()) {
             PQNode top = fringe.poll();
+            if (marked.get(top.getID()) != null) {
+                continue;
+            }
             if (top.getID() == destinationNode.getID()) {
                 break;
             }
@@ -49,6 +54,7 @@ public class Router {
                 }
                 fringe.add(new PQNode(node, distanceNodeToStart));
             }
+            marked.put(top.getID(), true);
         }
         Long currentNode = destinationNode.getID();
         result.addFirst(currentNode);
