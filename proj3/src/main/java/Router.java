@@ -60,7 +60,7 @@ public class Router {
         }
         Long currentNode = destinationNode.getID();
         result.addFirst(currentNode);
-        while (currentNode != startNode.getID()) {
+        while (currentNode != null && currentNode != startNode.getID()) {
             result.addFirst(edgeTo.get(currentNode));
             currentNode = edgeTo.get(currentNode);
         }

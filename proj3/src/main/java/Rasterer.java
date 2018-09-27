@@ -67,8 +67,8 @@ public class Rasterer {
             String[][] tileNames = convertTilestoStrings(queryGrid);
             Map<String, Object> results = buildResults(tileNames, topLeftTile.getUllon(), topLeftTile.getUllat(), bottomRightTile.getLrlon(), bottomRightTile.getLrlat(), depth);
 
-            System.out.println("Paramaters: " + params);
-            System.out.println("Results: " + results);
+//            System.out.println("Paramaters: " + params);
+//            System.out.println("Results: " + results);
             return results;
         } catch (Exception e) {
             Map<String, Object> results = new HashMap<>();
