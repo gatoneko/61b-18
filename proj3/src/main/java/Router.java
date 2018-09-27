@@ -24,7 +24,6 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        System.out.println("called");
         HashMap<Long, Double> distTo = new HashMap<>();
         HashMap<Long, Long> edgeTo = new HashMap<>();
         HashMap<Long, Boolean> marked = new HashMap<>();
