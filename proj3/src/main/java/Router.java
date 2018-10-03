@@ -39,6 +39,7 @@ public class Router {
         distTo.put(startNode.getID(), 0.0);
         edgeTo.put(startNode.getID(), null);
         while (!fringe.isEmpty()) {
+//            evaluateTop()
             PQNode top = fringe.poll();
             if (marked.get(top.getID()) != null) {
                 continue;
@@ -67,9 +68,6 @@ public class Router {
         return result; // FIXME
     }
 
-//    private static void relaxEdge(PQNode top, Node node, HashMap<Long, Double> distTo, HashMap<Long, Long> edgeTo, PriorityQueue<PQNode> fringe, PQNode startNode) {
-//        double edgeDistanceToStart = top.getDistance() +
-//    }
 
     /**
      * Create the list of directions corresponding to a route on the graph.
@@ -80,7 +78,18 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        List<NavigationDirection> result = new ArrayList<>();
+//        result.add(new NavigationDirection());
+//        result.add(new NavigationDirection());
+//        result.add(new NavigationDirection());
+//        result.add(new NavigationDirection(0, "fun way", 0.374));
+
+
+        for (Long lo: route) {
+            System.out.println("Node #: " + lo + " ways: " + g.getNode(lo).getPartOfWays());
+        }
+
+        return result;
     }
 
 
@@ -135,6 +144,17 @@ public class Router {
             this.direction = STRAIGHT;
             this.way = UNKNOWN_ROAD;
             this.distance = 0.0;
+        }
+
+        /**
+         * Create a NavigationDirection with 3 importants filled in
+         * @author Conrad
+         * @return
+         */
+        public NavigationDirection(int direction, String way, double distance) {
+            this.direction = direction;
+            this.way = way;
+            this.distance = distance;
         }
 
         public String toString() {

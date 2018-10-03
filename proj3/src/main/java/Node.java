@@ -8,6 +8,8 @@ public class Node {
     private double lat;
     private String name;
     private List<Edge> partOfEdges;
+
+
     private List<Way> partOfWays;
     private List<Node> adjacentNodes;
 
@@ -50,6 +52,10 @@ public class Node {
 
     public long getId() {
         return id;
+    }
+
+    public List<Way> getPartOfWays() {
+        return partOfWays;
     }
 
     public List<Node> getAdjacentNodes() {
