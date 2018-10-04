@@ -20,6 +20,8 @@ public class Way {
         this.way = nodes; //is a shallow copy enough?
     }
 
+    public Way() { }
+
     public Way(long id) {
         this.id = id;
         this.way = new ArrayList<>(); //is a shallow copy enough?

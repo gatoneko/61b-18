@@ -83,13 +83,135 @@ public class Router {
 //        result.add(new NavigationDirection());
 //        result.add(new NavigationDirection());
 //        result.add(new NavigationDirection(0, "fun way", 0.374));
+//        for (Long lo: route) {
+//            System.out.println("Node #: " + lo + " ways: " + g.getNode(lo).getPartOfWays());
+//        }
 
+        Node n = g.getNode(route.get(0));
+        Node next = g.getNode(route.get(1));
+        int direction = 0; //"start on..."
+        Way currentWay = new Way();
+        currentWay = getCommonWay(n, next);
+        double distance = 0.0;
+        double startingBearing = g.bearing(n.getId(), next.getId());
+        double bearing = 0.0;
 
-        for (Long lo: route) {
-            System.out.println("Node #: " + lo + " ways: " + g.getNode(lo).getPartOfWays());
+        //first node
+        int startingWay;
+        for (startingWay = 0; startingWay < route.size() - 1; startingWay++) {
+            n = g.getNode(route.get(startingWay));
+            next = g.getNode(route.get(startingWay + 1));
+            if (!hasCurrentWay(next, currentWay)) {
+//                if ()
+                result.add(new NavigationDirection(0, currentWay.getName(), distance));
+                currentWay = getCommonWay(n, next);
+                bearing = bearingDifference(startingBearing, g.bearing(n.getId(), next.getId()));
+                startingBearing = g.bearing(n.getId(), next.getId()); //absolute baring
+                distance = 0.0;
+                break;
+            } else {
+                distance += (g.distance(n, next));
+            }
         }
-
+        // all other nodes TODO code smell!
+        for (int i = startingWay; i < route.size() - 1; i++) {
+            n = g.getNode(route.get(i));
+            next = g.getNode(route.get(i + 1));
+            if (!hasCurrentWay(next, currentWay)) {
+//                if ()
+                result.add(new NavigationDirection(bearingToDirection(bearing), currentWay.getName(), distance));
+                currentWay = getCommonWay(n, next);
+                bearing = bearingDifference(startingBearing, g.bearing(n.getId(), next.getId()));
+                startingBearing = g.bearing(n.getId(), next.getId()); //absolute baring
+                distance = 0.0;
+            } else {
+                distance += (g.distance(n, next));
+            }
+        }
+        System.out.println("Before: " + result);
+        System.out.println();
+        result = consolidateDirections(result);
+        System.out.println("After: " + result);
         return result;
+    }
+
+    private static List<NavigationDirection> consolidateDirections(List<NavigationDirection> input) {
+        Iterator<NavigationDirection> iter = input.iterator();
+        List<NavigationDirection> result = new ArrayList<>();
+        result.add(iter.next()); // off by 1?
+
+        while (iter.hasNext()) {
+            NavigationDirection currentNode = iter.next();
+            NavigationDirection resultNode = result.get(result.size() - 1);
+            if (resultNode != null
+                    && matchDirections(currentNode, resultNode)
+                    && currentNode.way.equals(resultNode.way)) {
+                resultNode.distance += currentNode.distance;
+            } else {
+                result.add(currentNode);
+            }
+        }
+        return result;
+    }
+
+
+
+    /** compiled from:
+     * https://stackoverflow.com/questions/7570808/how-do-i-calculate-the-difference-of-two-angle-measures
+     * @param startingBearing
+     * @param newBearing
+     * @return difference of the two angles
+     */
+    public static double bearingDifference(double startingBearing, double newBearing) {
+        double phi = Math.abs(newBearing - startingBearing) % 360;
+        double difference = phi > 180 ? 360 - phi : phi; //absolute value only
+        int sign = (newBearing - startingBearing >= 0 && newBearing - startingBearing <= 180 )
+//                || newBearing - startingBearing <= -180 && newBearing - startingBearing >= -360)
+                ? 1 : -1;// -1 turn left, +1 turn right
+        return sign*difference;
+    }
+
+    public static int bearingToDirection(double bearing) {
+        if (bearing >= -15 && bearing <= 15) return 1;
+        if (bearing < -15 && bearing >= -30) return 2; //sl
+        if (bearing > 15 && bearing <= 30) return 3; //sr
+
+        if (bearing > 30 && bearing <= 100) return 4; //r
+        if (bearing < -30 && bearing >= -100) return 5; //l
+        if (bearing < -100) return 6; //sh l
+        if (bearing > 100) return 7; // sh r
+        else return 0;
+    }
+
+    public static boolean matchDirections(NavigationDirection a, NavigationDirection b) {
+        if ((a.direction == 0 || a.direction == 1 || a.direction == 2 || a.direction == 3)
+                && (b.direction == 0 || b.direction == 1 || b.direction == 2 || b.direction == 3)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static Way getCommonWay(Node n, Node next) {
+        List<Way> nWay = n.getPartOfWays();
+        List<Way> nextWay = next.getPartOfWays();
+        for (Way w : nWay) {
+            for (Way v : nextWay) {
+                if (w == v) {
+                    return w;
+                }
+            }
+        }
+        return null;
+
+    }
+
+    private static boolean hasCurrentWay(Node next, Way currentWay) {
+        List<Way> nextWay = next.getPartOfWays();
+        for (Way w : nextWay) {
+            if (w == currentWay) { return true; }
+        }
+        return false;
     }
 
 
@@ -153,7 +275,8 @@ public class Router {
          */
         public NavigationDirection(int direction, String way, double distance) {
             this.direction = direction;
-            this.way = way;
+            if (way == null) {this.way = UNKNOWN_ROAD;}
+            else { this.way = way; }
             this.distance = distance;
         }
 
