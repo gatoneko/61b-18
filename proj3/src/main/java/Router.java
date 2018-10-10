@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
  * down to the priority you use to order your vertices.
  */
 public class Router {
+    private static final double STARTING_PATH = -999.9;
     /**
      * Return a List of longs representing the shortest path from the node
      * closest to a start location and the node closest to the destination
@@ -79,46 +80,17 @@ public class Router {
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
         List<NavigationDirection> result = new ArrayList<>();
-//        result.add(new NavigationDirection());
-//        result.add(new NavigationDirection());
-//        result.add(new NavigationDirection());
-//        result.add(new NavigationDirection(0, "fun way", 0.374));
-//        for (Long lo: route) {
-//            System.out.println("Node #: " + lo + " ways: " + g.getNode(lo).getPartOfWays());
-//        }
 
         Node n = g.getNode(route.get(0));
         Node next = g.getNode(route.get(1));
-        int direction = 0; //"start on..."
-        Way currentWay = new Way();
-        currentWay = getCommonWay(n, next);
+        Way currentWay = getCommonWay(n, next);
         double distance = 0.0;
         double startingBearing = g.bearing(n.getId(), next.getId());
-        double bearing = 0.0;
-
-        //first node
-        int startingWay;
-        for (startingWay = 0; startingWay < route.size() - 1; startingWay++) {
-            n = g.getNode(route.get(startingWay));
-            next = g.getNode(route.get(startingWay + 1));
-            if (!hasCurrentWay(next, currentWay)) {
-//                if ()
-                result.add(new NavigationDirection(0, currentWay.getName(), distance));
-                currentWay = getCommonWay(n, next);
-                bearing = bearingDifference(startingBearing, g.bearing(n.getId(), next.getId()));
-                startingBearing = g.bearing(n.getId(), next.getId()); //absolute baring
-                distance = 0.0;
-                break;
-            } else {
-                distance += (g.distance(n, next));
-            }
-        }
-        // all other nodes TODO code smell!
-        for (int i = startingWay; i < route.size() - 1; i++) {
+        double bearing = STARTING_PATH;
+        for (int i = 0; i < route.size() - 1; i++) {
             n = g.getNode(route.get(i));
             next = g.getNode(route.get(i + 1));
             if (!hasCurrentWay(next, currentWay)) {
-//                if ()
                 result.add(new NavigationDirection(bearingToDirection(bearing), currentWay.getName(), distance));
                 currentWay = getCommonWay(n, next);
                 bearing = bearingDifference(startingBearing, g.bearing(n.getId(), next.getId()));
@@ -172,6 +144,7 @@ public class Router {
     }
 
     public static int bearingToDirection(double bearing) {
+        if (bearing == STARTING_PATH) return 0;
         if (bearing >= -15 && bearing <= 15) return 1;
         if (bearing < -15 && bearing >= -30) return 2; //sl
         if (bearing > 15 && bearing <= 30) return 3; //sr
