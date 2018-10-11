@@ -7,6 +7,7 @@ public class Node {
     private double lon;
     private double lat;
     private String name;
+    private String cleanedName;
     private List<Edge> partOfEdges;
 
 
@@ -60,5 +61,13 @@ public class Node {
 
     public List<Node> getAdjacentNodes() {
         return adjacentNodes;
+    }
+
+    public void setCleanedName(String cleanedName) {
+        this.cleanedName = cleanedName;
+    }
+
+    public String getCleanedName() {
+        return cleanedName;
     }
 }

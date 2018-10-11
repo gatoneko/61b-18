@@ -6,9 +6,8 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -25,7 +24,7 @@ public class GraphDB {
 
     private HashMap<Long, Node> nodes;
     private HashMap<Long, Way> ways;
-    private HashMap<Long, Node> locations;//todo add locations
+    private HashMap<Long, Node> locations;
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
@@ -49,6 +48,20 @@ public class GraphDB {
             e.printStackTrace();
         }
         clean();
+        cleanLocations();
+    }
+
+    /**
+     *  Remove nodes with no connections from the graph.
+     *  While this does not guarantee that any two nodes in the remaining graph are connected,
+     *  we can reasonably assume this since typically roads are connected.
+     */
+    private void cleanLocations() {
+        Iterator<Node> i = this.locations.values().iterator();
+        while (i.hasNext()) {
+            Node n = i.next();
+            n.setCleanedName(cleanString(n.getName()));
+        }
     }
 
     /**
@@ -249,5 +262,26 @@ public class GraphDB {
 
     public int getNodeSize() {
         return this.nodes.size();
+    }
+
+    public List<String> getMatch(String prefix) {
+//        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
+        int prefixLength = prefix.length();
+//        if (prefixLength < 1) return result;
+        Iterator<Node> i = this.locations.values().iterator();
+        while (i.hasNext()) {
+            Node n = i.next();
+            String nodeName = n.getCleanedName();
+            if(nodeName.length() < prefixLength) { continue; }
+            try {
+                if (nodeName.substring(0, prefixLength).equals(prefix)) {
+                    result.add(n.getName());
+                }
+            } catch (Exception e) {
+                System.out.println(nodeName);
+            }
+        }
+        return new ArrayList<>(result);
     }
 }
