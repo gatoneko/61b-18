@@ -326,7 +326,7 @@ $(function() {
     /* Make search bar do autocomplete things */
     $('#tags').autocomplete({
           source: search,
-          minLength: 2,
+          minLength: 1,
           select: function (event, ui) {
               $.get({
                   async: true,
@@ -344,7 +344,7 @@ $(function() {
                           });
                           ele.appendTo($('#markers'));
                           markers.push({lat: data[i].lat, lon: data[i].lon,
-                                        tx: 0, ty: 0, element: ele});
+                                        tx: 0, ty: 0, element: ele}); //TODO revert back to how it should be done data[i].lat etc:
                       }
                       update();
                   },

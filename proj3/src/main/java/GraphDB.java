@@ -22,9 +22,9 @@ public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Way, etc. */
 
-    private HashMap<Long, Node> nodes;
+    private HashMap<Long, Node> nodes; //connected unnamed shit..
     private HashMap<Long, Way> ways;
-    private HashMap<Long, Node> locations;
+    private HashMap<Long, Node> locations; //nodes of locations...
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
@@ -256,6 +256,28 @@ public class GraphDB {
         return nodes.get(id);
     }
 
+    public List<Node> getLocationsByName(String queryName) {
+        System.out.println("Query: " + queryName);
+        List<Node> result = new ArrayList<>();
+        Iterator<Node> iter = locations.values().iterator();
+        while (iter.hasNext()) {
+            Node n = iter.next();
+            try {
+                System.out.println(""  + queryName + ": Does it equal? " + n.getName());
+//                if (n.getName().equals(queryName)) {
+                if (queryName.equals(n.getName())) {
+                    System.out.println("Yes!");
+                    result.add(n);
+                }
+            } catch (Exception e) {
+                System.out.println("Exception: ");
+                System.out.println("Query: " + queryName);
+            }
+
+        }
+        return result;
+    }
+
     public Way getWay(Long id) {
         return this.ways.get(id);
     }
@@ -265,10 +287,8 @@ public class GraphDB {
     }
 
     public List<String> getMatch(String prefix) {
-//        List<String> result = new ArrayList<>();
         Set<String> result = new HashSet<>();
         int prefixLength = prefix.length();
-//        if (prefixLength < 1) return result;
         Iterator<Node> i = this.locations.values().iterator();
         while (i.hasNext()) {
             Node n = i.next();
