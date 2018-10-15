@@ -4,12 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -156,7 +151,10 @@ public class MapServer {
             /* Search for actual location data. */
             if (reqParams.contains("full")) {
                 List<Map<String, Object>> data = getLocations(term);
-                return gson.toJson(data);
+                String result = gson.toJson(data);
+                System.out.println(result);
+                return result;
+                //                return gson.toJson(data);
             } else {
                 /* Search for prefix matching strings. */
                 List<String> matches = getLocationsByPrefix(term);
@@ -302,12 +300,44 @@ public class MapServer {
      * "id" : Number, The id of the node. <br>
      */
     public static List<Map<String, Object>> getLocations(String locationName) {
-        LinkedList<Map<String,Object>> results = new LinkedList<>();
-        Map<String, Object> location =new HashMap<>();
-        location.put(locationName, new Location(ROOT_ULLON, ROOT_ULLAT, 1L));
-        results.add(location);
-        return results;
-        //        return new LinkedList<>();
+        /* TODO So here's what i think he's actually thinking about: We're trying
+         * TODO Make a list of Maps that contain the json variables
+         * TODO For example 1. make a new map 2. add to the map <"lat", Double the number> etc. <"name": String the name>... 3. Once you add these four key-val pairs to the map, you can add it to the list.
+          * TODO so to clarify: YOU DON'T NEED a Location object... just access the values with what you already have.*/
+//        LinkedList<Map<String,Object>> results = new LinkedList<>();
+//        Map<String, Object> location = new HashMap<>();
+//        location.put("a", new Location(37.8355976, -122.2921529, 1491094151L, locationName));
+//        Map<String, Object> location2 = new HashMap<>();
+//        location2.put("a", new Location(37.879909, -122.268580, 317106655L, locationName));
+//        results.add(location);
+//        results.add(location2);
+//        return results;
+
+
+        List<Node> matchingQueries = graph.getLocationsByName(locationName);
+        List<Map<String,Object>> result = turnNodesToJson(matchingQueries);
+
+//        Node toAdd = graph.getMatch(locationName); //this won't work. need to get id from locationName, which is unsanitized.
+        System.out.println(result);
+        return result;
+
+    }
+
+    private static List<Map<String, Object>> turnNodesToJson(List<Node> matchingQueries) {
+        List<Map<String,Object>> result = new ArrayList<>();
+        for(Node n : matchingQueries) {
+            result.add(nodeToJson(n));
+        }
+        return result;
+    }
+
+    private static Map<String, Object> nodeToJson(Node n) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("lat", n.getLat());
+        result.put("lon", n.getLon());
+        result.put("name", n.getName());
+        result.put("id", n.getId());
+        return result;
     }
 
     /**
