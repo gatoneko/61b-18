@@ -286,7 +286,7 @@ public class GraphDB {
         return this.nodes.size();
     }
 
-    public List<String> getMatch(String prefix) {
+    public List<String> getLocationsByPrefix(String prefix) {
         Set<String> result = new HashSet<>();
         int prefixLength = prefix.length();
         Iterator<Node> i = this.locations.values().iterator();

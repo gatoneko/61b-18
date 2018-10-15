@@ -283,7 +283,7 @@ public class MapServer {
      * cleaned <code>prefix</code>.
      */
     public static List<String> getLocationsByPrefix(String prefix) {
-        List<String> result = graph.getMatch(prefix);
+        List<String> result = graph.getLocationsByPrefix(prefix);
         return result;
     }
 
