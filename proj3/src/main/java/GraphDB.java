@@ -256,25 +256,39 @@ public class GraphDB {
         return nodes.get(id);
     }
 
-    public List<Node> getLocations(String queryName) {
-        System.out.println("Query: " + queryName);
+    public List<Map<String, Object>> getLocations(String locationName) {
+        locationName = cleanString(locationName);
+        List<Node> matchingQueries = getLocationsByName(locationName);
+        List<Map<String,Object>> result = turnNodesToJson(matchingQueries);
+        return result;
+    }
+
+    public List<Node> getLocationsByName(String queryName) {
         List<Node> result = new ArrayList<>();
         Iterator<Node> iter = locations.values().iterator();
         while (iter.hasNext()) {
             Node n = iter.next();
-            try {
-                System.out.println(""  + queryName + ": Does it equal? " + n.getName());
-//                if (n.getName().equals(queryName)) {
-                if (queryName.equals(n.getName())) {
-                    System.out.println("Yes!");
+                if (queryName.equals(n.getCleanedName())) {
                     result.add(n);
                 }
-            } catch (Exception e) {
-                System.out.println("Exception: ");
-                System.out.println("Query: " + queryName);
             }
+        return result;
+    }
 
+    private List<Map<String, Object>> turnNodesToJson(List<Node> matchingQueries) {
+        List<Map<String,Object>> result = new ArrayList<>();
+        for(Node n : matchingQueries) {
+            result.add(nodeToJson(n));
         }
+        return result;
+    }
+
+    private Map<String, Object> nodeToJson(Node n) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("lat", n.getLat());
+        result.put("lon", n.getLon());
+        result.put("name", n.getName());
+        result.put("id", n.getId());
         return result;
     }
 

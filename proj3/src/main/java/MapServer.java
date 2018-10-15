@@ -314,12 +314,12 @@ public class MapServer {
 //        return results;
 
 
-        List<Node> matchingQueries = graph.getLocations(locationName);
-        List<Map<String,Object>> result = turnNodesToJson(matchingQueries);
+//        List<Node> matchingQueries = graph.getLocationsByName(locationName);
+//        List<Map<String,Object>> result = turnNodesToJson(matchingQueries);
 
 //        Node toAdd = graph.getMatch(locationName); //this won't work. need to get id from locationName, which is unsanitized.
-        System.out.println(result);
-        return result;
+//        System.out.println(result);
+        return graph.getLocations(locationName);
 
     }
 
