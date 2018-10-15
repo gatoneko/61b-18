@@ -256,7 +256,7 @@ public class GraphDB {
         return nodes.get(id);
     }
 
-    public List<Node> getLocationsByName(String queryName) {
+    public List<Node> getLocations(String queryName) {
         System.out.println("Query: " + queryName);
         List<Node> result = new ArrayList<>();
         Iterator<Node> iter = locations.values().iterator();
