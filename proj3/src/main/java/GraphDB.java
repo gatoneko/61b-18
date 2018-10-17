@@ -25,7 +25,8 @@ public class GraphDB {
     private HashMap<Long, Node> nodes; //connected unnamed shit..
     private HashMap<Long, Way> ways;
     private HashMap<Long, Node> locations; //nodes of locations...
-    private HashMap<String, List<Node>> cleanedLocations; //todo make a map of all the nodes that match it, for easy access
+    private HashMap<String, List<Node>> cleanedLocations;
+    private TrieSet prefixTree;
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
@@ -36,6 +37,7 @@ public class GraphDB {
         ways = new HashMap<>();
         locations = new HashMap<>();
         cleanedLocations = new HashMap<>();
+        prefixTree = new TrieSet();
 
         try {
             File inputFile = new File(dbPath);
@@ -64,6 +66,7 @@ public class GraphDB {
             Node n = i.next();
             n.setCleanedName(cleanString(n.getName()));
             addToCleanedLocations(n.getCleanedName(), n);
+            prefixTree.put(n.getCleanedName());
         }
     }
 
@@ -276,15 +279,6 @@ public class GraphDB {
     }
 
     public List<Node> getLocationsByName(String queryName) {
-//        List<Node> result = new ArrayList<>();
-//        Iterator<Node> iter = locations.values().iterator();
-//        while (iter.hasNext()) {
-//            Node n = iter.next();
-//                if (queryName.equals(n.getCleanedName())) {
-//                    result.add(n);
-//                }
-//            }
-//        return result;
         return cleanedLocations.get(queryName);
     }
 
@@ -314,21 +308,23 @@ public class GraphDB {
     }
 
     public List<String> getLocationsByPrefix(String prefix) {
-        Set<String> result = new HashSet<>();
-        int prefixLength = prefix.length();
-        Iterator<Node> i = this.locations.values().iterator();
-        while (i.hasNext()) {
-            Node n = i.next();
-            String nodeName = n.getCleanedName();
-            if(nodeName.length() < prefixLength) { continue; }
-            try {
-                if (nodeName.substring(0, prefixLength).equals(prefix)) {
-                    result.add(n.getName());
-                }
-            } catch (Exception e) {
-                System.out.println(nodeName);
-            }
-        }
-        return new ArrayList<>(result);
+//        Set<String> result = new HashSet<>();
+//        int prefixLength = prefix.length();
+//        Iterator<Node> i = this.locations.values().iterator();
+//        while (i.hasNext()) {
+//            Node n = i.next();
+//            String nodeName = n.getCleanedName();
+//            if(nodeName.length() < prefixLength) { continue; }
+//            try {
+//                if (nodeName.substring(0, prefixLength).equals(prefix)) {
+//                    result.add(n.getName());
+//                }
+//            } catch (Exception e) {
+//                System.out.println(nodeName);
+//            }
+//        }
+//        return new ArrayList<>(result);
+        prefix = cleanString(prefix);
+        return prefixTree.getMatches(prefix);
     }
 }
