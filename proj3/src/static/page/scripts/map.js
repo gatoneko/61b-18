@@ -344,7 +344,7 @@ $(function() {
                           });
                           ele.appendTo($('#markers'));
                           markers.push({lat: data[i].lat, lon: data[i].lon,
-                                        tx: 0, ty: 0, element: ele}); //TODO revert back to how it should be done data[i].lat etc:
+                                        tx: 0, ty: 0, element: ele});
                       }
                       update();
                   },
