@@ -26,7 +26,7 @@ public class GraphDB {
     private HashMap<Long, Way> ways;
     private HashMap<Long, Node> locations; //nodes of locations...
     private HashMap<String, List<Node>> cleanedLocations;
-    private TrieSet prefixTree;
+    private TrieSet<Node> prefixTree;
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
@@ -37,7 +37,7 @@ public class GraphDB {
         ways = new HashMap<>();
         locations = new HashMap<>();
         cleanedLocations = new HashMap<>();
-        prefixTree = new TrieSet();
+        prefixTree = new TrieSet<>();
 
         try {
             File inputFile = new File(dbPath);
@@ -66,7 +66,7 @@ public class GraphDB {
             Node n = i.next();
             n.setCleanedName(cleanString(n.getName()));
             addToCleanedLocations(n.getCleanedName(), n);
-            prefixTree.put(n.getCleanedName());
+            prefixTree.put(n.getCleanedName(), n);
         }
     }
 
@@ -308,23 +308,14 @@ public class GraphDB {
     }
 
     public List<String> getLocationsByPrefix(String prefix) {
-//        Set<String> result = new HashSet<>();
-//        int prefixLength = prefix.length();
-//        Iterator<Node> i = this.locations.values().iterator();
-//        while (i.hasNext()) {
-//            Node n = i.next();
-//            String nodeName = n.getCleanedName();
-//            if(nodeName.length() < prefixLength) { continue; }
-//            try {
-//                if (nodeName.substring(0, prefixLength).equals(prefix)) {
-//                    result.add(n.getName());
-//                }
-//            } catch (Exception e) {
-//                System.out.println(nodeName);
-//            }
-//        }
-//        return new ArrayList<>(result);
         prefix = cleanString(prefix);
-        return prefixTree.getMatches(prefix);
+
+        List<Node> nodes = prefixTree.getMatches(prefix);
+        List<String> result = new ArrayList<>();
+
+        for (Node n : nodes) {
+            result.add(n.getName());
+        }
+        return result;
     }
 }
