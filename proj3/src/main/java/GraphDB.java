@@ -316,6 +316,7 @@ public class GraphDB {
         for (Node n : nodes) {
             result.add(n.getName());
         }
+        Collections.sort(result);
         return result;
     }
 }
